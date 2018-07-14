@@ -6,7 +6,7 @@
 #    By: rsibiet <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2015/11/25 10:49:22 by rsibiet           #+#    #+#              #
-#    Updated: 2016/02/20 16:21:48 by rsibiet          ###   ########.fr        #
+#    Updated: 2016/02/23 10:41:22 by rsibiet          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -94,23 +94,25 @@ all: $(NAME)
 $(NAME): $(FTO)
 	@ar rc $(NAME) $(FTO)
 	@ranlib $(NAME)
-	@echo "\033[32m\nLibft created!\033[0m"
+	@echo "\n\033[32m ____________________\033[0m"
+	@echo "\033[32m| • $(NAME) created! |\033[0m"
+	@echo "\033[32m|____________________|\033[0m"
 
 %.o: %.c
 	@gcc -Wall -Wextra -Werror -c $<
-	@echo "\033[36m#\033[0m\c"
+	@echo "\033[36m¬\033[0m\c"
 
 clean:
 	@rm -rf $(FTO)
-	@echo "\033[33mLibft object deleted!\033[0m"
+	@echo "\033[33m• Libft object deleted!\033[0m"
 
 fclean: clean
 	@rm -rf $(NAME)
-	@echo "\033[31mLibft deleted!\033[0m"
+	@echo "\033[31;1m• \033[31mLibft deleted!\033[0m"
 
 fcleana:
 	@rm -rf $(FTO)
 	@rm -rf $(NAME)
-	@echo "\033[31mLibft deleted!\033[0m"
+	@echo "\033[31;1m• \033[31mLibft deleted!\033[0m"
 
 re: fclean all

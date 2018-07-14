@@ -6,106 +6,105 @@
 /*   By: rsibiet <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/02/19 13:55:54 by rsibiet           #+#    #+#             */
-/*   Updated: 2016/02/20 15:14:50 by rsibiet          ###   ########.fr       */
+/*   Updated: 2016/02/24 16:33:29 by rsibiet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "fractol.h"
 
-void			ft_init_fractol(t_param *p)
+static void		julia(t_param *p, t_complexe c, t_complexe z)
 {
-	if (c[0][0] == '1')
-		ft_julia_1(p);
-	else if (c[0][0] == '2')
-		ft_julia_2(p);
-	else if (c[0][0] == '3')
-		ft_julia_3(p);
-	else if (c[0][0] == '4')
-		ft_julia_4(p);
-	else if (c[0][0] == '5')
-		ft_mandelbrot(p);
-	else if (c[0][0] == '6')
-		ft_lapin(p);
-	else if (c[0][0] == '7')
-		ft_dragon(p);
-	else if (c[0][0] == '8')
-		ft_aaa(p);
-	else if (c[0][0] == '9')
-		ft_bbb(p);
-}
-
-int			key_function(int keycode, t_param *p)
-{
-	if (keycode == 53)
-		exit(EXIT_SUCCESS);
-	mlx_clear_window(p->mlx, p->win);
-	draw_fractol(p);
-	mlx_put_image_to_window(p->mlx, p->win, p->img, 0, 0);
-	create_legend(p, 0, :wq0, 0);
-	mlx_destroy_image(p->mlx, p->img);
-	//      move_in_out(p, keycode);
-	//      move_fractol(p, keycode);
-	return (0);
-}
-
-static void		add_pixel_to_image(t_param *p)
-{
-	void		*mlx_ptr;
-	size_t		pixel_ptr;
-
-	mlx_ptr = p->mlx;
-	pixel_ptr = ((WIDTH * p->y) + p->x) * (p->bpp / 8);
-	p->color = mlx_get_color_value(mlx_ptr, 0xFFFFFF);
-	if (p->endian == 0)
-	{
-		(p->data + pixel_ptr)[2] = p->color >> 16;
-		(p->data + pixel_ptr)[1] = (p->color & 0x00FF00) >> 8;
-		(p->data + pixel_ptr)[0] = p->color & 0x0000FF;
-	}
-	else
-	{
-		(p->data + pixel_ptr)[0] = p->color >> 16;
-		(p->data + pixel_ptr)[1] = (p->color & 0x00FF00) >> 8;
-		(p->data + pixel_ptr)[2] = p->color & 0x0000FF;
-	}
-}
-
-static void		julia_1(t_param *p, t_complexe t)
-{
-	t_complexe	c;
-	int		i;
+	t_complexe	tp_c;
+	int			i;
 	double		tp;
 
-	c.r = 0;
-	c.i = 0;
+	tp_c.r = c.r;
+	tp_c.i = c.i;
 	i = 0;
-	while (i < p->iter && c.r * c.r + c.i * c.i < 4)
+	while (i < p->iter && tp_c.r * tp_c.r + tp_c.i * tp_c.i < 4)
 	{
-		tp = c.r;
-		c.r = c.r * c.r - c.i * c.i + t.r;
-		c.i = (2 * x * c.i) + t.i;
-		add_pixel_to_image(p);
+		tp = tp_c.r;
+		if (p->name[0] == '3')
+			tp_c.i *= -1;
+		tp_c.r = tp_c.r * tp_c.r - tp_c.i * tp_c.i + z.r;
+		tp_c.i = (2 * tp * tp_c.i) + z.i;
 		i++;
 	}
+	add_pixel_to_image(p, i, i < p->iter, 0);
+}
+
+static void		mandelbrot(t_param *p, t_complexe c)
+{
+	t_complexe	tp_c;
+	int			i;
+	double		tp;
+
+	tp_c.r = 0;
+	tp_c.i = 0;
+	i = 0;
+	while (i < p->iter && tp_c.r * tp_c.r + tp_c.i * tp_c.i < 4)
+	{
+		tp = tp_c.r;
+		if (p->name[0] == '5')
+			tp_c.i *= -1;
+		tp_c.r = tp_c.r * tp_c.r - tp_c.i * tp_c.i + c.r;
+		tp_c.i = (2 * tp * tp_c.i) + c.i;
+		i++;
+	}
+	add_pixel_to_image(p, i, i < p->iter, 0);
+}
+
+static void		burning_ship(t_param *p, t_complexe c)
+{
+	t_complexe	tp_c;
+	int			i;
+	double		tp;
+
+	tp_c.r = 0;
+	tp_c.i = 0;
+	i = 0;
+	while (i < p->iter && tp_c.r * tp_c.r + tp_c.i * tp_c.i < 4)
+	{
+		tp = tp_c.r;
+		tp_c.r = tp_c.r * tp_c.r - tp_c.i * tp_c.i + c.r;
+		tp_c.i = 2 * fabs(tp_c.i) * fabs(tp) + c.i;
+		i++;
+	}
+	add_pixel_to_image(p, i, i < p->iter, 0);
+}
+
+static void		select_fractal(t_param *p, t_complexe c)
+{
+	if (p->name[0] == '1' || p->name[0] == '2' || p->name[0] == '3')
+		julia(p, c, p->z);
+	else if (p->name[0] == '4' || p->name[0] == '5')
+		mandelbrot(p, c);
+	else if (p->name[0] == '6')
+		burning_ship(p, c);
+	else if (p->name[0] == '7')
+		fractale_7(p, c, p->z);
+	else if (p->name[0] == '8' || p->name[0] == '9')
+		fractale_8(p, c, p->z);
 }
 
 void			draw_fractol(t_param *p)
 {
-	t_complexe	t;
+	t_complexe	c;
 
 	p->y = 0;
-	t.r = 0;
-	t.i = 0;
+	c.i = p->init.i + p->pos.i;
+	c.r = p->init.r + p->pos.r;
 	while (p->y < HEIGHT)
 	{
 		p->x = 0;
+		c.i = p->init.i + p->pos.i;
 		while (p->x < WIDTH)
 		{
-			julia_1(p, t);
+			select_fractal(p, c);
 			(p->x)++;
-			t.i += 0.001;
+			c.i += p->zoom;
 		}
 		(p->y)++;
-		t.r += 0.001;
+		c.r += p->zoom;
 	}
 }
